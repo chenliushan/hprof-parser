@@ -2,13 +2,16 @@ package hk.polyu.comp;
 
 import edu.tufts.eaftan.hprofparser.parser.datastructures.AllocSite;
 
-public class GroupTraceAllocSite extends GroupAllocSite {
-    public GroupTraceAllocSite(AllocSite allocSite) {
+public class GroupFrameAllocSite extends GroupAllocSite {
+
+    public GroupFrameAllocSite(AllocSite allocSite) {
         super(allocSite);
     }
 
     public void addAllocSite(AllocSite allocSite) {
-        if (this.stackTraceSerialNum == allocSite.stackTraceSerialNum) {
+        String firstFrameAlloc = getFirstFrameContainsKeyword(allocSite, KEY_WORD);
+        String firstFramethis = getFirstFrameContainsKeyword(this, KEY_WORD);
+        if (firstFramethis.equals(firstFrameAlloc)) {
             super.addAllocSite(allocSite);
         }
     }

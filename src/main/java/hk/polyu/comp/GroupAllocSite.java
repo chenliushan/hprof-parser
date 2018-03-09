@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupAllocSite extends AllocSite {
+    final static String KEY_WORD = "polyu";
+    final static String format = "%-15s  %-90s  %25s %25s %25s %25s";
+    final static double convert = 0.000001;
+
     List<AllocSite> allocSiteList = new ArrayList<>();
-    static String format = "%-15s  %-90s  %25s %25s %25s %25s";
-    double convert = 0.000001;
 
     public GroupAllocSite(AllocSite allocSite) {
         super(allocSite.arrayIndicator, allocSite.classSerialNum, allocSite.stackTraceSerialNum, allocSite.numLiveBytes,
@@ -29,5 +31,27 @@ public class GroupAllocSite extends AllocSite {
                 numBytesAllocated * convert, numInstancesAllocated, numLiveBytes * convert, numLiveInstances);
     }
 
+    public static void travelTrace(AllocSite allocSite, String keyWord, boolean firstOnly) {
+        HprofTrace trace = HprofTrace.traceMap.get(allocSite.stackTraceSerialNum);
+        System.out.println(trace.info());
+        for (HprofFrame hprofFrame : trace.getFrames()) {
+            if (!keyWord.trim().equals("-") && hprofFrame.toString().toLowerCase().contains(keyWord.toLowerCase())) {
+                System.out.println(hprofFrame.toString());
+                if (firstOnly) break;
+            }
+
+        }
+    }
+
+    public static String getFirstFrameContainsKeyword(AllocSite allocSite, String keyWord) {
+        HprofTrace trace = HprofTrace.traceMap.get(allocSite.stackTraceSerialNum);
+        for (HprofFrame hprofFrame : trace.getFrames()) {
+            if (hprofFrame.toString().toLowerCase().contains(keyWord.toLowerCase())) {
+                return hprofFrame.toString();
+            }
+
+        }
+        return "Others";
+    }
 
 }

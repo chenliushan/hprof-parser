@@ -24,15 +24,5 @@ public class GroupClassAllocSite extends GroupAllocSite {
         }
     }
 
-    public static void travelTrace(AllocSite allocSite, String keyWord, boolean firstOnly) {
-        HprofTrace trace = HprofTrace.traceMap.get(allocSite.stackTraceSerialNum);
-        System.out.println(trace.info());
-        for (HprofFrame hprofFrame : trace.getFrames()) {
-            if (!keyWord.trim().equals("-") && hprofFrame.toString().toLowerCase().contains(keyWord.toLowerCase())) {
-                System.out.println(hprofFrame.toString());
-                if (firstOnly) break;
-            }
 
-        }
-    }
 }

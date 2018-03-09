@@ -17,12 +17,12 @@
 package hk.polyu.comp;
 
 import edu.tufts.eaftan.hprofparser.parser.datastructures.AllocSite;
-import edu.tufts.eaftan.hprofparser.parser.datastructures.CPUSample;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static hk.polyu.comp.GroupAllocSite.KEY_WORD;
 import static hk.polyu.comp.HprofTrace.construct;
 
 /**
@@ -91,51 +91,6 @@ public class SiteHandler extends MyHandler {
         Collections.addAll(allocSites, sites);
     }
 
-    @Override
-    public void heapSummary(int totalLiveBytes, int totalLiveInstances,
-                            long totalBytesAllocated, long totalInstancesAllocated) {
-        System.out.println("Heap Summary:");
-        System.out.println("    total live bytes: " + totalLiveBytes);
-        System.out.println("    total live instances: " + totalLiveInstances);
-        System.out.println("    total bytes allocated: " + totalBytesAllocated);
-        System.out.println("    total instances allocated: " + totalInstancesAllocated);
-    }
-
-    @Override
-    public void startThread(int threadSerialNum, long threadObjectId,
-                            int stackTraceSerialNum, long threadNameStringId, long threadGroupNameId,
-                            long threadParentGroupNameId) {
-    }
-
-    @Override
-    public void endThread(int threadSerialNum) {
-    }
-
-    @Override
-    public void heapDump() {
-        System.out.println("Heap Dump:");
-    }
-
-    @Override
-    public void heapDumpEnd() {
-        System.out.println("Heap Dump End:");
-    }
-
-    @Override
-    public void heapDumpSegment() {
-        System.out.println("Heap Dump Segment:");
-    }
-
-    @Override
-    public void cpuSamples(int totalNumOfSamples, CPUSample[] samples) {
-        System.out.println("CPU Samples:");
-        System.out.println("    total num of samples: " + totalNumOfSamples);
-        for (int i = 0; i < samples.length; i++) {
-            System.out.println("        cpu sample " + (i + 1) + ":");
-            System.out.println("            number of samples: " + samples[i].numSamples);
-            System.out.println("            stack trace serial num: " + samples[i].stackTraceSerialNum);
-        }
-    }
 
     @Override
     public void controlSettings(int bitMaskFlags, short stackTraceDepth) {
@@ -157,9 +112,26 @@ public class SiteHandler extends MyHandler {
     @Override
     public void finished() {
         super.finished();
-
+        groupByFirstJaidFrame();
 //        groupByTrace();
-        groupByClass();
+//        groupByClass();
+    }
+
+    private void groupByFirstJaidFrame() {
+        Map<String, GroupFrameAllocSite> groupByTrace = new HashMap<>();
+        for (AllocSite allocSite : allocSites) {
+            String firstFrameAlloc = GroupAllocSite.getFirstFrameContainsKeyword(allocSite, KEY_WORD);
+
+            if (groupByTrace.containsKey(firstFrameAlloc)) {
+                groupByTrace.get(firstFrameAlloc).addAllocSite(allocSite);
+            } else {
+                groupByTrace.put(firstFrameAlloc, new GroupFrameAllocSite(allocSite));
+            }
+        }
+        List<GroupAllocSite> sortedGroup = groupByTrace.values().stream()
+                .sorted((c1, c2) -> (c2.numLiveBytes - c1.numLiveBytes))
+                .collect(Collectors.toList());
+        printSite(sortedGroup, "FirstJaidFrame");
     }
 
 
@@ -209,9 +181,8 @@ public class SiteHandler extends MyHandler {
         System.out.println(String.format(GroupClassAllocSite.format, groupKey, "ClassNames",
                 "numBytesAllocated", "numInstancesAllocated", "numLiveBytes", "numLiveInstances"));
         sortedGroup.forEach(x -> System.out.println(x.toString()));
-        System.out.println(sortedGroup.size());
         printTotal(sortedGroup);
-
+        System.out.println("Size: " + sortedGroup.size());
     }
 
     private void printTotal(List<GroupAllocSite> sortedGroup) {
