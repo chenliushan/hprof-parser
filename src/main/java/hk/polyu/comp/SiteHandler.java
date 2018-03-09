@@ -114,7 +114,7 @@ public class SiteHandler extends MyHandler {
         super.finished();
         groupByFirstJaidFrame();
 //        groupByTrace();
-//        groupByClass();
+        groupByClass();
     }
 
     private void groupByFirstJaidFrame() {
@@ -162,7 +162,7 @@ public class SiteHandler extends MyHandler {
             }
         }
         List<GroupAllocSite> sortedGroup = groupedAllocSites.values().stream()
-                .sorted((c1, c2) -> (c2.numBytesAllocated - c1.numBytesAllocated))
+                .sorted((c1, c2) -> (c2.numLiveBytes - c1.numLiveBytes))
                 .collect(Collectors.toList());
         Scanner scanner = new Scanner(System.in);
         while (true) {

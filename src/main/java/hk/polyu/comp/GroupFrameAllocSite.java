@@ -4,6 +4,8 @@ import edu.tufts.eaftan.hprofparser.parser.datastructures.AllocSite;
 
 public class GroupFrameAllocSite extends GroupAllocSite {
 
+    int count = 1;
+
     public GroupFrameAllocSite(AllocSite allocSite) {
         super(allocSite);
     }
@@ -13,12 +15,13 @@ public class GroupFrameAllocSite extends GroupAllocSite {
         String firstFramethis = getFirstFrameContainsKeyword(this, KEY_WORD);
         if (firstFramethis.equals(firstFrameAlloc)) {
             super.addAllocSite(allocSite);
+            count += 1;
         }
     }
 
     @Override
     public String toString() {
-        return getFormatString(getFirstFrameContainsKeyword(this, "polyu"));
+        return getFormatString(count + " " + getFirstFrameContainsKeyword(this, "polyu"));
     }
 
 
