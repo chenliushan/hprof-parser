@@ -2,34 +2,20 @@ package hk.polyu.comp;
 
 import edu.tufts.eaftan.hprofparser.parser.datastructures.AllocSite;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class GroupClassAllocSite extends AllocSite {
-    List<AllocSite> allocSiteList = new ArrayList<>();
-    static String format = "%-15s  %-90s  %25s %25s %25s %25s";
-    double convert = 0.000001;
+public class GroupClassAllocSite extends GroupAllocSite {
 
     public GroupClassAllocSite(AllocSite allocSite) {
-        super(allocSite.arrayIndicator, allocSite.classSerialNum, allocSite.stackTraceSerialNum, allocSite.numLiveBytes,
-                allocSite.numLiveInstances, allocSite.numBytesAllocated, allocSite.numInstancesAllocated);
-        allocSiteList.add(allocSite);
+        super(allocSite);
     }
 
     public void addAllocSite(AllocSite allocSite) {
-        if (this.classSerialNum == allocSite.classSerialNum) {
-            allocSiteList.add(allocSite);
-            this.numLiveBytes += allocSite.numLiveBytes;
-            this.numLiveInstances += allocSite.numLiveInstances;
-            this.numBytesAllocated += allocSite.numBytesAllocated;
-            this.numInstancesAllocated += allocSite.numInstancesAllocated;
-        }
+        if (this.classSerialNum == allocSite.classSerialNum)
+            super.addAllocSite(allocSite);
     }
 
     @Override
     public String toString() {
-        return String.format(format, classSerialNum, LoadedClass.getClassName(classSerialNum),
-                numBytesAllocated * convert, numInstancesAllocated, numLiveBytes * convert, numLiveInstances);
+        return getFormatString(LoadedClass.getClassName(classSerialNum));
     }
 
     public void getMethods(String keyWord) {

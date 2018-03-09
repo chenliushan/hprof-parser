@@ -31,7 +31,7 @@ public class HprofFrame {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(": " + LoadedClass.getClassName(classSerialNum) + "#" + DumpHandler.idStringMap.get(methodNameStringId));
+        sb.append(LoadedClass.getClassName(classSerialNum) + "#" + DumpHandler.idStringMap.get(methodNameStringId));
         switch (location) {
 
             case 0:

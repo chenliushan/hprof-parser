@@ -158,7 +158,8 @@ public class SiteHandler extends MyHandler {
     public void finished() {
         super.finished();
 
-        groupByTrace();
+//        groupByTrace();
+        groupByClass();
     }
 
 
@@ -171,39 +172,14 @@ public class SiteHandler extends MyHandler {
                 groupByTrace.put(allocSite.stackTraceSerialNum, new GroupTraceAllocSite(allocSite));
             }
         }
-        List<GroupTraceAllocSite> sortedGroup = groupByTrace.values().stream()
+        List<GroupAllocSite> sortedGroup = groupByTrace.values().stream()
                 .sorted((c1, c2) -> (c2.numBytesAllocated - c1.numBytesAllocated))
                 .collect(Collectors.toList());
-        System.out.println(String.format(GroupTraceAllocSite.format, "stackTraceSerialNum", "firstFrame",
-                "numBytesAllocated", "numInstancesAllocated", "numLiveBytes", "numLiveInstances"));
-        sortedGroup.forEach(x -> System.out.println(x.toString()));
-        System.out.println(sortedGroup.size());
-
+        printSite(sortedGroup, "stackTraceSerialNum");
     }
 
-    private void groupBysite() {
-        List<GroupClassAllocSite> sortedGroup = groupSite();
-        Scanner scanner = new Scanner(System.in);
-        Map<Integer, GroupClassAllocSite> groupedAllocSiteMap = sortedGroup.stream().collect(Collectors.toMap(x -> x.classSerialNum, x -> x));
-        while (true) {
-            printSite(sortedGroup);
-            System.out.print("\nEnter classSerialNum to print: ");
-            int classSerialNum = scanner.nextInt();
-            System.out.print("\nEnter keyword: ");
-            String keyWord = scanner.next();
-            GroupClassAllocSite groupClassAllocSite = groupedAllocSiteMap.get(classSerialNum);
-            if (groupClassAllocSite != null) groupClassAllocSite.getMethods(keyWord);
-        }
-    }
 
-    private void printSite(List<GroupClassAllocSite> sortedGroup) {
-        System.out.println(String.format(GroupClassAllocSite.format, "classSerialNum", "ClassNames",
-                "numBytesAllocated", "numInstancesAllocated", "numLiveBytes", "numLiveInstances"));
-        sortedGroup.forEach(x -> System.out.println(x.toString()));
-        System.out.println(sortedGroup.size());
-    }
-
-    private List<GroupClassAllocSite> groupSite() {
+    private void groupByClass() {
 
         Map<Integer, GroupClassAllocSite> groupedAllocSites = new HashMap<>();
         for (AllocSite allocSite : allocSites) {
@@ -213,12 +189,40 @@ public class SiteHandler extends MyHandler {
                 groupedAllocSites.put(allocSite.classSerialNum, new GroupClassAllocSite(allocSite));
             }
         }
-        return groupedAllocSites.values().stream()
+        List<GroupAllocSite> sortedGroup = groupedAllocSites.values().stream()
                 .sorted((c1, c2) -> (c2.numBytesAllocated - c1.numBytesAllocated))
                 .collect(Collectors.toList());
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            printSite(sortedGroup, "classSerialNum");
+            System.out.print("\nEnter classSerialNum to print: ");
+            int classSerialNum = scanner.nextInt();
+            System.out.print("\nEnter keyword: ");
+            String keyWord = scanner.next();
+            GroupClassAllocSite groupClassAllocSite = (GroupClassAllocSite) groupedAllocSites.get(classSerialNum);
+            if (groupClassAllocSite != null) groupClassAllocSite.getMethods(keyWord);
+        }
+    }
 
+    private void printSite(List<GroupAllocSite> sortedGroup, String groupKey) {
+
+        System.out.println(String.format(GroupClassAllocSite.format, groupKey, "ClassNames",
+                "numBytesAllocated", "numInstancesAllocated", "numLiveBytes", "numLiveInstances"));
+        sortedGroup.forEach(x -> System.out.println(x.toString()));
+        System.out.println(sortedGroup.size());
+        printTotal(sortedGroup);
 
     }
+
+    private void printTotal(List<GroupAllocSite> sortedGroup) {
+        GroupAllocSite total = null;
+        for (GroupAllocSite x : sortedGroup) {
+            if (total == null) total = new GroupAllocSite(x);
+            else total.addAllocSite(x);
+        }
+        System.out.println(total.getFormatString("TOTAL"));
+    }
+
 
     /* Utility methods */
 
