@@ -18,27 +18,28 @@ package edu.tufts.eaftan.hprofparser.parser.datastructures;
 
 public class AllocSite {
 
-  public byte arrayIndicator;
-  public int classSerialNum;
-  public int stackTraceSerialNum;
-  public int numLiveBytes;
-  public int numLiveInstances;
-  public int numBytesAllocated;
-  public int numInstancesAllocated;
+    public byte arrayIndicator;
+    public int classSerialNum;
+    public int stackTraceSerialNum;
+    public long numLiveBytes;
+    public long numLiveInstances;
+    public long numBytesAllocated;
+    public long numInstancesAllocated;
 
-  public AllocSite(byte arrayIndicator, int classSerialNum, 
-      int stackTraceSerialNum, int numLiveBytes, int numLiveInstances, 
-      int numBytesAllocated, int numInstancesAllocated) {
+    public AllocSite(byte arrayIndicator, int classSerialNum,
+                     int stackTraceSerialNum, long numLiveBytes, long numLiveInstances,
+                     long numBytesAllocated, long numInstancesAllocated) {
 
-    this.arrayIndicator = arrayIndicator;
-    this.classSerialNum = classSerialNum;
-    this.stackTraceSerialNum = stackTraceSerialNum;
-    this.numLiveBytes = numLiveBytes;
-    this.numLiveInstances = numLiveInstances;
-    this.numBytesAllocated = numBytesAllocated;
-    this.numInstancesAllocated = numInstancesAllocated;
+        if (numBytesAllocated < 0) numBytesAllocated = Integer.MAX_VALUE;
+        this.arrayIndicator = arrayIndicator;
+        this.classSerialNum = classSerialNum;
+        this.stackTraceSerialNum = stackTraceSerialNum;
+        this.numLiveBytes = numLiveBytes;
+        this.numLiveInstances = numLiveInstances;
+        this.numBytesAllocated = numBytesAllocated;
+        this.numInstancesAllocated = numInstancesAllocated;
 
-  }
+    }
 
 }
 

@@ -88,7 +88,8 @@ public class SiteHandler extends MyHandler {
         System.out.println("    total live instances: " + totalLiveInstances);
         System.out.println("    total bytes allocated: " + totalBytesAllocated);
         System.out.println("    total instances allocated: " + totalInstancesAllocated);
-        Collections.addAll(allocSites, sites);
+//        Collections.addAll(allocSites, sites);
+        allocSites = Arrays.asList(sites).stream().filter(x -> x.numBytesAllocated > 0 && x.numLiveBytes > 0).collect(Collectors.toList());
     }
 
 
@@ -129,7 +130,7 @@ public class SiteHandler extends MyHandler {
             }
         }
         List<GroupAllocSite> sortedGroup = groupByTrace.values().stream()
-                .sorted((c1, c2) -> (c2.numLiveBytes - c1.numLiveBytes))
+                .sorted((c1, c2) -> ((int)(c2.numLiveBytes - c1.numLiveBytes)))
                 .collect(Collectors.toList());
         printSite(sortedGroup, "FirstJaidFrame");
     }
@@ -145,7 +146,7 @@ public class SiteHandler extends MyHandler {
             }
         }
         List<GroupAllocSite> sortedGroup = groupByTrace.values().stream()
-                .sorted((c1, c2) -> (c2.numBytesAllocated - c1.numBytesAllocated))
+                .sorted((c1, c2) -> ((int)(c2.numLiveBytes - c1.numLiveBytes)))
                 .collect(Collectors.toList());
         printSite(sortedGroup, "stackTraceSerialNum");
     }
@@ -162,7 +163,7 @@ public class SiteHandler extends MyHandler {
             }
         }
         List<GroupAllocSite> sortedGroup = groupedAllocSites.values().stream()
-                .sorted((c1, c2) -> (c2.numLiveBytes - c1.numLiveBytes))
+                .sorted((c1, c2) -> ((int)(c2.numLiveBytes - c1.numLiveBytes)))
                 .collect(Collectors.toList());
         Scanner scanner = new Scanner(System.in);
         while (true) {
